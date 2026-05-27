@@ -95,7 +95,7 @@ React components (both SSR and island) apply GOV.UK Frontend CSS class names dir
 │   │   │   └── http-exception.filter.ts      # Global filter → renders views/error.njk
 │   │   ├── guards/
 │   │   │   └── journey-step.guard.ts         # Prevents skipping form steps; redirects back
-│   │   │   ├── decorators/
+│   │   ├── decorators/
 │   │   │   └── required-steps.decorator.ts   # @RequiredSteps metadata decorator for JourneyStepGuard
 │   │   ├── middleware/
 │   │   │   └── session.middleware.ts         # express-session configuration
@@ -112,7 +112,7 @@ React components (both SSR and island) apply GOV.UK Frontend CSS class names dir
 │   │   │       ├── defendant-details.dto.ts
 │   │   │       ├── claim-details.dto.ts
 │   │   │       ├── fee-summary.dto.ts
-│   │   │       └── application-form-data.type.ts
+│   │   │       └── application-form-data.type.ts # Plain typescript type, not a DTO or class; colocated here for convenience
 │   │   ├── applications/                     # My applications list
 │   │   │   ├── applications.module.ts
 │   │   │   ├── applications.controller.ts
@@ -209,10 +209,10 @@ React components (both SSR and island) apply GOV.UK Frontend CSS class names dir
 - Serve `public/` as static assets under `/`
 - The scaffold uses the precompiled GOV.UK Frontend CSS bundle from `govuk-frontend/dist`
 - `scripts/copy-assets.ts` copies the following into `public/assets/`:
-  - `govuk-frontend.min.css`
   - `/fonts`
   - `/images`
 - No Sass compilation pipeline is required for the scaffold
+- `client/entry.ts` must be compiled by esbuild into `public/js/entry.js` as a separate entry point from the island bundles. Add it explicitly to the esbuild config in `scripts/build-islands.ts` alongside the island glob — it must be built in both watch mode and one-shot mode. `entry.ts` must not import React or any island component; it is responsible only for GOV.UK Frontend initialisation and generic island discovery.
 - Register `express-session` middleware with in-memory store (PoC only — document this is not production-safe)
 - Register global `ValidationPipe` with `whitelist: true` and `transform: true`
 - Register global `HttpExceptionFilter`
@@ -330,7 +330,7 @@ The `<script>document.body.classList.add('js-enabled');</script>` snippet is the
 
 **[SCAFFOLD]** Implement a NestJS guard that:
 
-- Reads `session.completedSteps` (an array of completed step names)
+- Reads `session.completedSteps` (an array of completed step names) (initialise to [] on first request)
 - Each route handler is decorated with `@RequiredSteps(['claim-type', 'your-details', ...])` (a custom decorator)
 - If the required preceding steps are not in `completedSteps`, redirect to the earliest incomplete step
 - This prevents users navigating directly to `/apply/check-your-answers` without completing earlier steps
@@ -610,7 +610,7 @@ All UI state is expressed in the URL. No client-side state management of any kin
 **[SCAFFOLD]** Implement:
 
 1. Parse and validate query parameters (invalid values silently reset to defaults)
-2. Call `ApplicationsService.findAll(filters)`, which calls `ApiClientService.getApplications()` and applies search, filter, sort in-memory (appropriate for mock data volumes)
+2. Call `ApplicationsService.findAll(validQueryParams)`, which calls `ApiClientService.getApplications(validQueryParams)` and applies search, filter, sort in-memory (appropriate for mock data volumes)
 3. Apply pagination (page size: 10)
 4. Pass to template: `{ applications, total, page, pageSize, totalPages, search, status, sort, order }`
 5. The template reconstructs sort links by appending `?sort=<col>&order=<dir>` to the current query string while preserving the active `search`, `status`, and `page` parameters
@@ -661,6 +661,10 @@ Reference Number cells contain a `govukLink` navigating to `/dashboard/{{ applic
 
 After submission (and also by clicking a Reference Number anchor in an item within the My Applications list), the user can view their application status on a dashboard page. This page is rendered entirely as a server-rendered React component tree, invoked by a NestJS controller. **No React JavaScript is shipped to the client for this page.** The browser receives plain HTML.
 
+### Clarification on SSR approach
+
+"React Server Components" (the React framework feature) are not used anywhere in this scaffold. Instead, it uses React SSR (non-hydrated) via `renderToString` for server-side composability.
+
 ### Routes
 
 | Method | Route                         | Description                                                     |
@@ -686,7 +690,7 @@ The NestJS controller:
 
 Props: `{ application: Application; timeline: TimelineEvent[] }`
 
-Composes: `<ApplicationSummaryCard>` + `<StatusTimeline>` + `<NextStepsPanel>`
+Composes: `<ApplicationSummaryCard>` + `<StatusTimeline>`
 
 #### `ApplicationSummaryCard.tsx`
 
@@ -745,7 +749,8 @@ export function renderIslandMount(manifest: IslandManifest): string {
   const safeProps = JSON.stringify(manifest.props)
     .replace(/</g, "\\u003c")
     .replace(/>/g, "\\u003e")
-    .replace(/&/g, "\\u0026");
+    .replace(/&/g, "\\u0026")
+    .replace(/'/g, "\\u0027");
 
   return `<div id="${manifest.mountId}" data-island="${manifest.bundle}" data-props='${safeProps}'></div>`;
 }
@@ -803,7 +808,9 @@ export default function mount(el: HTMLElement, props: unknown) {
 
 ### Setup
 
-Install `json-server` as a dev dependency. Start with:
+Install `json-server` as a dev dependency. This scaffold requires json-server v0.17.4 exactly. Pin this in package.json: `"json-server": "0.17.4"`. json-server v1 is a breaking rewrite with an incompatible query API and must not be used. The v0.17.x query behaviours are relied upon by this scaffold.
+
+Start with:
 
 ```
 json-server --watch mock-api/db.json --port 3001 --routes mock-api/routes.json
@@ -967,21 +974,36 @@ json-server --watch mock-api/db.json --port 3001 --routes mock-api/routes.json
 **[SCAFFOLD]** Implement all of the following in `api-client.service.ts`:
 
 ```typescript
-getApplications(): Promise<Application[]>
+enum CaseStatus {
+  Submitted = "submitted",
+  AwaitingResponse = "awaiting-response",
+  HearingScheduled = "hearing-scheduled",
+  Closed = "closed",
+}
+enum SortBy {
+  SubmittedAt = "submittedAt",
+  Reference = "reference",
+  Amount = "amount",
+  Status = "status,
+}
+enum SortBy {
+  Asc = "asc",
+  Desc = "desc",
+}
+getApplications(validQueryParams: { search: string, filters: { status: CaseStatus; }, sortBy: SortBy, orderBy: OrderBy, page: number }): Promise<Application[]>
 getApplicationByRef(ref: string): Promise<Application>
 getFeeBands(): Promise<FeeBand[]>
 calculateFee(claimValue: number): Promise<{ band: string; amount: number }>
 createApplication(data: CreateApplicationDto): Promise<{ referenceNumber: string; submittedAt: string }>
 ```
 
-Note that `getApplicationByRef(ref)` must call `GET /applications?referenceNumber=<ref>` against JSON Server and:
+Note that `getApplicationByRef(ref)` must call `GET /applications` against JSON Server to return all applications and:
 
+- perform search matching in the `getApplicationByRef` implementation
 - return the first matching record
 - throw `NotFoundException` if no record exists
 
-This indirection is intentional because JSON Server only supports direct `/resource/:id` lookups against the `id` field, whereas the PoC routes applications by human-readable reference number.
-
-Note: the `?referenceNumber=<ref>` query parameter works because JSON Server supports field-equality filtering on any field in `db.json` using query parameters. This is only used for direct reference number lookups. The free-text search on the My Applications list page (`?search=`) is implemented entirely in-memory within `ApplicationsService.findAll()` and must NOT delegate search logic to JSON Server.
+The scaffold must NOT delegate any search or query logic to JSON Server. To clarify, always fetch all records from JSON Server endpoints; all searching, filtering, sorting, and pagination happen in-memory in ApplicationsService.
 
 Also note that `calculateFee(claimValue)` must:
 
@@ -991,9 +1013,7 @@ Also note that `calculateFee(claimValue)` must:
    - `claimValue <= maxValue`
 3. Return the matching `{ band, amount }`.
 
-The fee lookup algorithm is intentionally implemented in the BFF rather than JSON Server because JSON Server cannot perform numeric range queries against static data.
-
-On any non-2xx HTTP response, throw `new ApiClientException(status, url)`. The global exception filter catches this and renders `views/error.njk` with an appropriate message.
+On any non-2xx HTTP response, throw `new ApiClientException(status, url)`. The global exception filter catches this and renders `views/error.njk` with an appropriate message. Create an appropriate, minimal implementation for the `ApiClientException` class to support this.
 
 ---
 
@@ -1031,7 +1051,7 @@ The scaffold intentionally avoids a custom Sass pipeline to keep the PoC determi
     "build:islands:watch": "ts-node scripts/build-islands.ts --watch",
     "copy-assets": "ts-node scripts/copy-assets.ts",
     "start": "node dist/main",
-    "dev": "concurrently \"npm run copy-assets\" \"npm run build:islands:watch\" \"nest start --watch\" \"npm run mock-api\"",
+    "dev": "concurrently --kill-others-on-fail false \"npm run copy-assets\" \"npm run build:islands:watch\" \"nest start --watch\" \"npm run mock-api\"",
     "mock-api": "json-server --watch mock-api/db.json --port 3001 --routes mock-api/routes.json",
     "test": "jest",
     "test:e2e": "jest --config jest-e2e.json",
@@ -1054,44 +1074,38 @@ import { glob } from "glob";
 const watch = process.argv.includes("--watch");
 const production = process.env.NODE_ENV === "production";
 
-const entryPoints = await glob("client/islands/**/mount.tsx");
+const entryPoints = glob.sync([
+  "client/entry.ts",
+  "client/islands/**/mount.tsx",
+]);
 
-const ctx = await esbuild.context({
+const buildOptions: esbuild.BuildOptions = {
   entryPoints,
   bundle: true,
   outdir: "public/js",
-  entryNames: "[dir]/[name]", // produces e.g. public/js/FeeCalculator/mount.js
-  outbase: "client/islands",
+  entryNames: "[dir]/[name]",
+  outbase: "client",
   format: "esm",
   target: "es2020",
   minify: production,
   sourcemap: !production,
-});
+};
 
-if (watch) {
-  await ctx.watch();
-  console.log("Watching island bundles...");
-} else {
-  await ctx.rebuild();
-  await ctx.dispose();
-  console.log("Island bundles built.");
-}
+(async () => {
+  if (watch) {
+    const ctx = await esbuild.context(buildOptions);
+    await ctx.watch();
+    console.log("Watching bundles...");
+  } else {
+    await esbuild.build(buildOptions);
+    console.log("Bundles built.");
+  }
+})();
 ```
 
 **[DECISION]** Output path for fee calculator island bundle: `/js/FeeCalculator/mount.js`.
 
-The `/apply/fee-summary` controller must construct the island mount using:
-
-````typescript
-export function renderIslandMount(manifest: IslandManifest): string {
-  const safeProps = JSON.stringify(manifest.props)
-    .replace(/</g, '\\u003c')
-    .replace(/>/g, '\\u003e')
-    .replace(/&/g, '\\u0026')
-    .replace(/'/g, '\\u0027');
-
-  return `<div id="${manifest.mountId}" data-island="${manifest.bundle}" data-props='${safeProps}'></div>`;
-}```
+The `/apply/fee-summary` controller must construct the island mount using the renderIslandMount function defined in `src/react/islands/island-loader.ts` as described in section 11.
 
 ---
 
@@ -1099,13 +1113,13 @@ export function renderIslandMount(manifest: IslandManifest): string {
 
 **[SCAFFOLD]** Generate the following test files with meaningful, passing test cases. Tests must not be empty or `it.todo` stubs.
 
-| File | Test cases |
-|---|---|
-| `test/app.e2e-spec.ts` | `GET /apply/start` returns 200 and contains "Start a money claim"; `GET /` redirects to `/apply/start` |
-| `test/apply/apply.controller.spec.ts` | `POST /apply/claim-type` with no selection re-renders with 4xx error; valid `money-claim` selection redirects to `/apply/your-details`; `GET /apply/check-your-answers` without completed steps redirects to `/apply/start`; POST /apply/check-your-answers: validates required session data exists, calls ApiClientService.createApplication(...), stores returned reference number in session, clears application journey session state, redirects to /apply/confirmation (PRG) |
-| `test/applications/applications.controller.spec.ts` | `GET /my-applications` returns 200 with table; `?status=submitted` filters results to submitted only; `?search=ABC` filters by defendant name; `?sort=amount&order=asc` returns results sorted by amount ascending |
-| `test/dashboard/dashboard.controller.spec.ts` | `GET /dashboard/SC-2024-00123` returns 200 with React SSR components |
-| `test/react/react-ssr.service.spec.ts` | `render(ApplicationSummaryCard, props)` returns string containing `govuk-summary-card`; `render(StatusTimeline, props)` returns string containing each event description |
+| File                                                | Test cases                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `test/app.e2e-spec.ts`                              | `GET /apply/start` returns 200 and contains "Start a money claim"; `GET /` redirects to `/apply/start`                                                                                                                                                                                                                                                                                                                                                                            |
+| `test/apply/apply.controller.spec.ts`               | `POST /apply/claim-type` with no selection re-renders with 4xx error; valid `money-claim` selection redirects to `/apply/your-details`; `GET /apply/check-your-answers` without completed steps redirects to `/apply/start`; POST /apply/check-your-answers: validates required session data exists, calls ApiClientService.createApplication(...), stores returned reference number in session, clears application journey session state, redirects to /apply/confirmation (PRG) |
+| `test/applications/applications.controller.spec.ts` | `GET /my-applications` returns 200 with table; `?status=submitted` filters results to submitted only; `?search=ABC` filters by defendant name; `?sort=amount&order=asc` returns results sorted by amount ascending                                                                                                                                                                                                                                                                |
+| `test/dashboard/dashboard.controller.spec.ts`       | `GET /dashboard/SC-2024-00123` returns 200 with React SSR components                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `test/react/react-ssr.service.spec.ts`              | `render(ApplicationSummaryCard, props)` returns string containing `govuk-summary-card`; `render(StatusTimeline, props)` returns string containing each event description                                                                                                                                                                                                                                                                                                          |
 
 ---
 
@@ -1184,6 +1198,7 @@ Generate the following files:
 ### `README.md`
 
 Include:
+
 - Prerequisites (Node.js ≥ 20, npm ≥ 10)
 - Quick start: `npm install && npm run dev`
 - What the PoC demonstrates (3-paragraph prose overview matching the architectural argument in Section 1)
@@ -1195,6 +1210,7 @@ Include:
 ### `ARCHITECTURE.md`
 
 Include:
+
 - A Mermaid diagram showing: Browser → NestJS BFF (three rendering modes annotated) → JSON Server Mock API
 - Prose explanation of the three rendering modes: Nunjucks SSR, React SSR (server-only string injection), React island (client mount with fallback)
 - A table summarising which pages use which rendering mode
@@ -1225,4 +1241,3 @@ Ensure `mock-api/db.json`, session handling, and route guards are configured so 
 **This end-to-end flow, including step 11 with JavaScript disabled, must work with the generated scaffold without any additional manual setup.**
 
 ---
-````
