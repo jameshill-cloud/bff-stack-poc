@@ -9,6 +9,7 @@ const govukDistPath = join(
   'dist',
   'govuk',
 );
+const govukAssetsPath = join(govukDistPath, 'assets');
 const publicAssetsPath = join(__dirname, '..', 'public', 'assets');
 
 // Create public/assets directory if it doesn't exist
@@ -28,7 +29,7 @@ try {
 
 // Copy fonts
 try {
-  cpSync(join(govukDistPath, 'fonts'), join(publicAssetsPath, 'fonts'), {
+  cpSync(join(govukAssetsPath, 'fonts'), join(publicAssetsPath, 'fonts'), {
     recursive: true,
     force: true,
   });
@@ -39,7 +40,7 @@ try {
 
 // Copy images
 try {
-  cpSync(join(govukDistPath, 'images'), join(publicAssetsPath, 'images'), {
+  cpSync(join(govukAssetsPath, 'images'), join(publicAssetsPath, 'images'), {
     recursive: true,
     force: true,
   });
