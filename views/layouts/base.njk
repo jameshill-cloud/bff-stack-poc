@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" class="govuk-template">
+<head>
+  <meta charset="utf-8">
+  <title>{{ pageTitle }} – Small Claims Portal – GOV.UK</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/assets/govuk-frontend.min.css">
+</head>
+<body class="govuk-template__body">
+  <script>document.body.classList.add('js-enabled');</script>
+
+  {% include "partials/header.njk" %}
+
+  <div class="govuk-width-container">
+    {% include "partials/phase-banner.njk" %}
+    {% block beforeContent %}{% endblock %}
+    <main class="govuk-main-wrapper" id="main-content">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  {% include "partials/footer.njk" %}
+
+  <script type="module" src="/js/entry.js" defer></script>
+  {% block islandScripts %}{% endblock %}
+</body>
+</html>
