@@ -3,13 +3,13 @@
 {% block content %}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
-    <h1 class="govuk-heading-xl">Welcome to the Small Claims Portal</h1>
+    <h1 class="govuk-heading-xl">Small Claims Portal</h1>
 
     <p class="govuk-body">
-      This is the ALPHA phase of a new service for managing small claims within HMCTS.
+      This is the ALPHA phase of a new service
     </p>
 
-    <h2 class="govuk-heading-m">React Server-Side Rendering Example</h2>
+    <h2 class="govuk-heading-m">React SSR Example</h2>
     <div class="govuk-inset-text">
       The content below is rendered by React on the server and sent as HTML:
     </div>
@@ -21,7 +21,10 @@
       The component below is a React island that hydrates interactively on the client:
     </p>
 
-    {{ islandMount | safe }}
+    {% set initialCount = initialCount | default(0) %}
+    {% set counterValue = counterValue | default(0) %}
+
+    {% include "partials/example-island.njk" %}
 
     <h2 class="govuk-heading-m">Learn More</h2>
     <ul class="govuk-list govuk-list--bullet">

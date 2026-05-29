@@ -34,6 +34,12 @@ const ClientExampleIsland: React.FC<ExampleIslandProps> = ({
 };
 
 export default (el: HTMLElement, props: ExampleIslandProps) => {
+  // Hide the fallback when JavaScript is available
+  const fallback = document.getElementById('example-island-fallback');
+  if (fallback) {
+    fallback.classList.add('js-hidden');
+  }
+
   const root = createRoot(el);
   root.render(<ClientExampleIsland {...props} />);
 };
