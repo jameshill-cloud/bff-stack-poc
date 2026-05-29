@@ -1,0 +1,40 @@
+{
+  "name": "BFF PoC sandboxed dev environment",
+
+  // Official Microsoft devcontainers image — Node.js LTS on Debian Bookworm
+  // Source: https://github.com/devcontainers/images
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:22-bookworm",
+
+  // Store the workspace in a Docker named volume, NOT a host bind-mount.
+  // This means the container has no path back to your home directory.
+  "workspaceMount": "source=sandbox-workspace,target=/workspace,type=volume",
+  "workspaceFolder": "/workspace",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  },
+
+  // Forward ports so you can open your app in the host browser
+  "forwardPorts": [3000, 3001, 8080, 8081],
+
+  // Security hardening — applied at container runtime
+  "runArgs": [
+    "--cap-drop=ALL", // Drop all Linux capabilities
+    "--security-opt=no-new-privileges:true", // Prevent privilege escalation
+    "--network=bridge" // Normal outbound internet, no host network
+    // Deliberately omitting: -v /var/run/docker.sock  (no Docker socket)
+    // Deliberately omitting: --privileged
+  ],
+
+  // Allow Cline to reach Ollama on the host
+  "containerEnv": {
+    "OLLAMA_HOST": "http://host.docker.internal:11434"
+  },
+
+  "postCreateCommand": "npm install -g @nestjs/cli typescript ts-node"
+}
