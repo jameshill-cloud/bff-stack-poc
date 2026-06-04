@@ -2,7 +2,7 @@
   "compilerOptions": {
     "module": "nodenext",
     "target": "ES2021",
-    "lib": ["ES2021"],
+    "lib": ["ES2021", "dom"],
     "outDir": "./dist",
     "rootDir": "./",
     "strict": true,
@@ -20,6 +20,5 @@
     "emitDecoratorMetadata": true,
     "types": ["node"]
   },
-  "include": ["src/**/*", "scripts/**/*"],
-  "exclude": ["node_modules", "dist", "test"]
+  "include": ["client/**/*", "scripts/**/*", "src/**/*", "types/**/*"],
 }

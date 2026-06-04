@@ -3,10 +3,9 @@ import {
   Catch,
   ArgumentsHost,
   HttpException,
-  HttpStatus,
   Logger,
-} from '@nestjs/common';
-import { Response } from 'express';
+} from "@nestjs/common";
+import { Response } from "express";
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -20,10 +19,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     this.logger.error(`HTTP ${status} - ${exception.message}`);
 
-    response.status(status).render('error', {
-      pageTitle: 'Error',
+    response.status(status).render("error", {
+      pageTitle: "Error",
       status,
-      message: (exceptionResponse as any).message || 'An error occurred',
+      message: (exceptionResponse as any).message || "An error occurred",
     });
   }
 }

@@ -1,12 +1,12 @@
-import { initAll } from 'govuk-frontend';
+import { initAll } from "govuk-frontend";
 
 // Initialize GOV.UK Frontend components
 initAll();
 
 // Mount React islands
-document.querySelectorAll<HTMLElement>('[data-island]').forEach(async (el) => {
+document.querySelectorAll<HTMLElement>("[data-island]").forEach(async (el) => {
   const bundle = el.dataset.island;
-  const props = JSON.parse(el.dataset.props ?? '{}');
+  const props = JSON.parse(el.dataset.props ?? "{}");
 
   if (!bundle) return;
 

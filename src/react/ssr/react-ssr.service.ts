@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { renderToString } from 'react-dom/server';
-import { createElement, ComponentType } from 'react';
+import { Injectable } from "@nestjs/common";
+import { renderToString } from "react-dom/server";
+import { createElement, ComponentType } from "react";
 
 @Injectable()
 export class ReactSSRService {

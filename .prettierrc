@@ -1,7 +1,13 @@
 {
-  "semi": true,
-  "trailingComma": "all",
-  "singleQuote": true,
-  "printWidth": 80,
-  "tabWidth": 2
+  "tabWidth": 2,
+  "useTabs": false,
+  "plugins": ["prettier-plugin-jinja-template"],
+  "overrides": [
+    {
+      "files": "*.njk",
+      "options": {
+        "parser": "jinja-template"
+      }
+    }
+  ]
 }

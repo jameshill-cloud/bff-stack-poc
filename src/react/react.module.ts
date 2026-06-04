@@ -1,5 +1,5 @@
-import { Module } from '@nestjs/common';
-import { ReactSSRService } from './ssr';
+import { Module } from "@nestjs/common";
+import { ReactSSRService } from "./ssr";
 
 @Module({
   providers: [ReactSSRService],

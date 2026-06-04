@@ -1,1 +1,1 @@
-export * from './react-ssr.service';
+export * from "./react-ssr.service";
