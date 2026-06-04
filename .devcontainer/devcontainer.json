@@ -36,5 +36,10 @@
     "OLLAMA_HOST": "http://host.docker.internal:11434"
   },
 
-  "postCreateCommand": "npm install -g @nestjs/cli typescript ts-node"
+  "postCreateCommand": "npm install -g @nestjs/cli typescript ts-node",
+
+  // forward SSH agent from host to allow authenticating with github from inside devcontainer
+  "remoteEnv": {
+    "SSH_AUTH_SOCK": "${localEnv:SSH_AUTH_SOCK}"
+  }
 }
