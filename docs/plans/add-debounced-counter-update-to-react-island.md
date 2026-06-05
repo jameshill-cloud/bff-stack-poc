@@ -1,6 +1,8 @@
 # Plan: Adding Debounced POST Requests to ExampleIsland Component
 
-Perfect! That's a much cleaner approach. Here's the refined implementation plan:
+STATUS: implemented (plan for reference only)
+
+This document details the implementation plan for an update to the `app.controller.ts` and the `ExampleIsland` client-side React component (which progressively enhances the base SSR version of the example island component, which updates the counterValue using form POST requests). The React component should send a POST request to update the authoritative serverside `counterValue` on a 500ms debounce, without causing a page reload. The update should happen silently in the background. When the user reloads the page, the updated `counterValue` will be server rendered into the page as the "initial count".
 
 ## Architecture Overview
 

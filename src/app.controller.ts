@@ -7,6 +7,8 @@ import { renderIslandMount } from "./react/islands/island-loader";
 
 @Controller()
 export class AppController {
+  private counterValue: number = 0;
+
   constructor(
     private readonly appService: AppService,
     private readonly reactSSRService: ReactSSRService,
@@ -22,7 +24,10 @@ export class AppController {
       },
     );
 
-    const islandProps = { initialCount: 0 };
+    const islandProps = { initialCount: this.counterValue };
+
+    console.log("this.counterValue", this.counterValue);
+
     const islandMount = renderIslandMount({
       mountId: "example-island-mount",
       bundle: "/js/islands/ExampleIsland/mount.js",
@@ -34,36 +39,29 @@ export class AppController {
       message: this.appService.getHello(),
       serverComponentHtml,
       islandMount,
+      counterValue: this.counterValue,
     });
   }
 
   @Post("/example-island")
   handleExampleIsland(@Res() res: Response, @Body() body: any): void {
-    let counterValue = body.counterValue ? parseInt(body.counterValue) : 0;
-
-    if (body.action === "increment") {
-      counterValue += 1;
-    } else if (body.action === "decrement") {
-      counterValue -= 1;
+    // Update the server-side counterValue from request body
+    if (body.counterValue !== undefined) {
+      this.counterValue = parseInt(body.counterValue);
     }
 
-    const islandProps = { initialCount: counterValue };
-    const islandMount = renderIslandMount({
-      mountId: "example-island-mount",
-      bundle: "/js/islands/ExampleIsland/mount.js",
-      props: islandProps,
-    });
+    // Conditional rendering: if action is present, it's a form submission (with page render)
+    if (body.action) {
+      if (body.action === "increment") {
+        this.counterValue += 1;
+      } else if (body.action === "decrement") {
+        this.counterValue -= 1;
+      }
 
-    res.render("home", {
-      pageTitle: "Home",
-      message: this.appService.getHello(),
-      serverComponentHtml: this.reactSSRService.render(ExampleServerComponent, {
-        title: "Example Server Component",
-        message: "This is rendered on the server with React",
-      }),
-      islandMount,
-      initialCount: 0,
-      counterValue: counterValue,
-    });
+      res.redirect("/");
+    } else {
+      // Silent response for debounced requests (no page re-render)
+      res.json({ success: true, counterValue: this.counterValue });
+    }
   }
 }

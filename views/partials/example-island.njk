@@ -1,8 +1,7 @@
 <form method="POST" action="/example-island">
   <div id="example-island-fallback" class="govuk-panel">
     <h2 class="govuk-heading-m">JavaScript disabled: SSR fallback</h2>
-    <p class="govuk-body">Initial count: <strong>{{ initialCount }}</strong></p>
-    <p class="govuk-body">Current: {{ counterValue }}</p>
+    <p class="govuk-body">Count: {{ counterValue }}</p>
     <div style="display:inline-flex;gap:8px">
       <button
         id="decrement-btn"
