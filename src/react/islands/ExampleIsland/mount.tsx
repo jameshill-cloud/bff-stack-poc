@@ -1,5 +1,6 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
+import { EXAMPLE_ISLAND_POST_COUNTER_DEBOUNCE } from "../../../common/constants";
 
 interface ExampleIslandProps {
   initialCount: number;
@@ -20,6 +21,7 @@ const ClientExampleIsland: React.FC<ExampleIslandProps> = ({
 
     // Set new timeout for debounced request
     debounceTimerId.current = window.setTimeout(() => {
+      console.log(`sending POST to update counter value at ${Date.now()}`);
       // Send POST request with new counter value (no action field)
       fetch("/example-island", {
         method: "POST",
@@ -30,7 +32,7 @@ const ClientExampleIsland: React.FC<ExampleIslandProps> = ({
       }).catch((error) => {
         console.error("Failed to update counter on server:", error);
       });
-    }, 500); // 500ms debounce
+    }, EXAMPLE_ISLAND_POST_COUNTER_DEBOUNCE); // 500ms debounce
 
     // Cleanup function to clear timeout on unmount
     return () => {

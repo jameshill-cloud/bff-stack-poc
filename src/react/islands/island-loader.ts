@@ -11,5 +11,9 @@ export function renderIslandMount(manifest: IslandManifest): string {
     .replace(/&/g, "\\u0026")
     .replace(/'/g, "\\u0027");
 
-  return `<div id="${manifest.mountId}" data-island="${manifest.bundle}" data-props='${safeProps}'></div>`;
+  // Add cache-busting query parameter with current timestamp
+  // This ensures browser doesn't cache stale island bundles during development
+  const bundleWithCacheBuster = `${manifest.bundle}?v=${Date.now()}`;
+
+  return `<div id="${manifest.mountId}" data-island="${bundleWithCacheBuster}" data-props='${safeProps}'></div>`;
 }

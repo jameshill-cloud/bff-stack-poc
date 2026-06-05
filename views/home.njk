@@ -3,11 +3,8 @@
 {% block content %}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
+    <span class="govuk-caption-m">NestJS + React PoC</span>
     <h1 class="govuk-heading-xl">Small Claims Portal</h1>
-
-    <p class="govuk-body">
-      This is the ALPHA phase of a new service
-    </p>
 
     <h2 class="govuk-heading-m">React SSR Example</h2>
     <div class="govuk-inset-text">
@@ -16,7 +13,7 @@
 
     {{ serverComponentHtml | safe }}
 
-    <h2 class="govuk-heading-m">Interactive Island Example</h2>
+    <h2 class="govuk-heading-m" style="margin-top: 4rem">Interactive Island Example</h2>
     <p class="govuk-body">
       The component below is a React island that hydrates interactively on the client:
     </p>
@@ -26,13 +23,13 @@
 
     {% include "partials/example-island.njk" %}
 
-    <h2 class="govuk-heading-m">Learn More</h2>
+    <h2 class="govuk-heading-m">Features</h2>
     <ul class="govuk-list govuk-list--bullet">
-      <li>Progressive enhancement with server-first rendering</li>
-      <li>React for server-side HTML generation</li>
-      <li>React islands for interactive components</li>
       <li>GOV.UK Frontend styling and components</li>
+      <li>Progressive enhancement with server-first rendering</li>
       <li>Fully functional without JavaScript</li>
+      <li>Option to use Nunjucks or React for server-side HTML generation</li>
+      <li>React islands for components requiring client-side interactivity</li>
     </ul>
   </div>
 </div>
