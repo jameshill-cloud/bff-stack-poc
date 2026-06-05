@@ -1,7 +1,7 @@
 {
   "name": "agents-fullstack-phase1-bootstrap-setup",
   "version": "1.0.0",
-  "description": "HMCTS Small Claims Application Portal - Phase 1 Bootstrap",
+  "description": "NestJS + React PoC for modern SSR-first GOV.UK technology stack",
   "main": "dist/main.js",
   "type": "commonjs",
   "scripts": {

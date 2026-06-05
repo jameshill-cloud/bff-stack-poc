@@ -1,4 +1,4 @@
-# NestJS + React Proof of Concept: HMCTS Small Claims Application Portal
+# NestJS + React Proof of Concept
 
 A minimal Backend-for-Frontend (BFF) proof-of-concept demonstrating a modern, GDS-compliant technology stack.
 
@@ -239,6 +239,7 @@ The application will start on the port defined in `.env` (default 3000).
 
 ## Support and Documentation
 
+- PoC Docs: see `/docs` directory in the repository
 - [NestJS Docs](https://docs.nestjs.com)
 - [GOV.UK Frontend](https://frontend.design-system.service.gov.uk)
 - [React SSR](https://react.dev/reference/react-dom/server)

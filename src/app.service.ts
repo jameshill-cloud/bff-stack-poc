@@ -3,6 +3,6 @@ import { Injectable } from "@nestjs/common";
 @Injectable()
 export class AppService {
   getHello(): string {
-    return "Small Claims Portal - Phase 1";
+    return "Hello from the NestJS + React PoC";
   }
 }
