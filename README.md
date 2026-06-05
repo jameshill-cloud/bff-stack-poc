@@ -1,4 +1,4 @@
-# HMCTS Small Claims Application Portal - Phase 1 Bootstrap
+# NestJS + React Proof of Concept: HMCTS Small Claims Application Portal
 
 A minimal Backend-for-Frontend (BFF) proof-of-concept demonstrating a modern, GDS-compliant technology stack.
 
@@ -37,8 +37,6 @@ This phase implements a **server-first, progressively enhanced** architecture:
 
 - Uses GOV.UK Frontend Nunjucks macros and precompiled CSS
 - All pages render server-first without JavaScript
-- ALPHA phase banner on every page
-- Custom `govukErrors` filter for form validation
 
 ### React Server-Side Rendering (SSR)
 
@@ -53,7 +51,7 @@ This phase implements a **server-first, progressively enhanced** architecture:
 - Independent bundles with esbuild
 - Lazy-loaded via dynamic imports on the client
 - Communicate via HTML data attributes (`data-island`, `data-props`)
-- Not required for page functionality (progressive enhancement)
+- Not required for page functionality (progressive enhancement only)
 
 ### esbuild Pipeline
 
@@ -66,7 +64,6 @@ This phase implements a **server-first, progressively enhanced** architecture:
 ### Mock API
 
 - Runs on port 3001 via **JSON Server**
-- Health check endpoint: `GET /health`
 - Routes defined in `mock-api/routes.json`
 - Data stored in `mock-api/db.json`
 
@@ -88,13 +85,32 @@ This phase implements a **server-first, progressively enhanced** architecture:
 ## Project Structure
 
 ```
+mock-api/
+├── db.json              # JSON Server data
+└── routes.json          # JSON Server routing
+
+public/
+├── assets/              # GOV.UK Frontend CSS, fonts, images (generated)
+└── js/                  # Compiled bundles (generated)
+
+scripts/
+├── copy-assets.ts       # Copy GOV.UK Frontend assets
+└── build-islands.ts     # esbuild orchestration
+
 src/
 ├── main.ts              # NestJS bootstrap, Nunjucks config
 ├── app.module.ts        # Root module
 ├── app.controller.ts    # Routes
 ├── app.service.ts       # Business logic
+├── client/
+│   ├── entry.ts             # Initializes GOV.UK and mounts islands
+│   └── islands/
+│       └── ExampleIsland/
+│           └── mount.tsx    # Island hydration
 ├── config/
 │   └── configuration.ts # Typed config from env
+├── css/
+│   └── example-island.css # CSS supporting progressive enhancement of example island component
 ├── common/
 │   ├── filters/
 │   │   └── http-exception.filter.ts
@@ -121,24 +137,6 @@ views/
 │   └── error-summary.njk
 ├── home.njk
 └── error.njk
-
-client/
-├── entry.ts             # Initializes GOV.UK and mounts islands
-└── islands/
-    └── ExampleIsland/
-        └── mount.tsx    # Island hydration
-
-public/
-├── assets/              # GOV.UK Frontend CSS, fonts, images (generated)
-└── js/                  # Compiled bundles (generated)
-
-mock-api/
-├── db.json              # JSON Server data
-└── routes.json          # JSON Server routing
-
-scripts/
-├── copy-assets.ts       # Copy GOV.UK Frontend assets
-└── build-islands.ts     # esbuild orchestration
 ```
 
 ## Environment Variables
@@ -192,16 +190,16 @@ NODE_ENV=development                        # development or production
 ### ✅ Single BFF Framework
 
 - NestJS is the sole controller
-- No Next.js, Remix, or meta-framework
+- No Next.js, Remix, or other meta-framework
 - Direct control over rendering flow
 
-### ✅ No Client-Side Router
+### ✅ No Client-Side Routing
 
 - Traditional multipage navigation
 - Full page loads (or partial via fetch + Nunjucks)
 - Simpler, more predictable behavior
 
-## Testing
+## Testing (WIP)
 
 ```bash
 # Run all tests
@@ -239,16 +237,6 @@ The application will start on the port defined in `.env` (default 3000).
 
 **Note:** The mock API (JSON Server) is separate and not included in the production build. For a real API, replace `MOCK_API_BASE_URL` with your actual backend endpoint.
 
-## Next Steps (Future Phases)
-
-- Implement application form journey
-- Add real data persistence layer
-- Integrate with actual HMCTS services
-- Add authentication and authorization
-- Implement accessibility testing
-- Performance optimization (caching, CDN)
-- Load testing and scalability improvements
-
 ## Support and Documentation
 
 - [NestJS Docs](https://docs.nestjs.com)
@@ -258,5 +246,3 @@ The application will start on the port defined in `.env` (default 3000).
 - [JSON Server](https://github.com/typicode/json-server)
 
 ---
-
-**Phase 1** establishes the foundational infrastructure. It is not a complete application but a working scaffold demonstrating architecture patterns and technology integration.

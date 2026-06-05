@@ -3,32 +3,30 @@
 ## System Overview
 
 ```mermaid
-graph TB
+graph LR
     Browser["🌐 Browser"]
     NestJS["NestJS BFF<br/>(Express Adapter)"]
     Nunjucks["📝 Nunjucks<br/>(Templating)"]
     React["⚛️  React SSR<br/>(renderToString)"]
-    StaticAssets["📦 Static Assets<br/>(GOV.UK CSS, JS)"]
-    Islands["🏝️ React Islands<br/>(Lazy-loaded)"]
-    JsonServer["📊 JSON Server<br/>(Mock API)"]
+    Islands["🏝️ React Islands<br/>(client-side)"]
+    MockAPI["📊 Mock API<br/>(JSON server)"]
 
     Browser -->|GET /| NestJS
+    Browser -->|fetch| NestJS
     NestJS -->|render| Nunjucks
     NestJS -->|renderToString| React
-    Nunjucks -->|injects| React
-    Nunjucks -->|references| StaticAssets
+    React -->|injected into| Nunjucks
     Nunjucks -->|mounts| Islands
     Islands -->|lazy-load| Browser
-    NestJS -->|queries| JsonServer
-    Browser -->|fetch| JsonServer
+    Nunjucks -->|returns HTML| Browser
+    NestJS -->|queries| MockAPI
 
-    style Browser fill:#f0f0f0
-    style NestJS fill:#e1f5ff
-    style Nunjucks fill:#fff3e0
-    style React fill:#f3e5f5
-    style StaticAssets fill:#e8f5e9
-    style Islands fill:#fce4ec
-    style JsonServer fill:#f1f8e9
+    style Browser fill:#aa6600
+    style NestJS fill:#000088
+    style Nunjucks fill:#3d8137
+    style React fill:#884444
+    style Islands fill:#4488ff
+    style MockAPI fill:#888800
 ```
 
 ## Request Flow
@@ -80,16 +78,24 @@ User interacts with island (e.g., button click)
     ↓
 React state updates in island
     ↓
-Component re-renders (client-side only)
+Component re-renders client-side
     ↓
 DOM updates in browser
+    ↓
+Debounced background POST request sends client-side state to BFF
+    ↓
+Authoritative server-side state updates in BFF
+    ↓
+User reloads page
+    ↓
+Updated authoritative server-side state renders in UI
 ```
 
 ## Rendering Modes
 
 ### Server-Side Rendering (SSR) - Nunjucks
 
-**Used for:** Static page layouts, forms, informational content
+**Use cases:** Static page layouts, forms, informational content
 
 **Process:**
 
@@ -101,7 +107,7 @@ DOM updates in browser
 
 ### Server-Side Rendering (SSR) - React
 
-**Used for:** Data presentation, pre-rendered components
+**Use cases:** Data presentation, complex/custom components without significant JS interactivity
 
 **Process:**
 
@@ -114,7 +120,7 @@ DOM updates in browser
 
 ### Client-Side Islands
 
-**Used for:** Interactive components (forms, counters, etc.)
+**Use cases:** complex/custom components requiring significant JS interactivity
 
 **Process:**
 
@@ -125,7 +131,7 @@ DOM updates in browser
 5. Island's mount.tsx creates React root and renders component
 6. Component now interactive via React hooks/state
 
-**Output:** Interactive React component (only this component, not full app)
+**Output:** Interactive React component (only the individual component in isolation, not the full app)
 
 ## GOV.UK Frontend Integration
 
@@ -173,6 +179,7 @@ Output Structure:
   public/
   ├── assets/
   │   ├── govuk-frontend.min.css
+  │   ├── example-island.css
   │   ├── fonts/
   │   └── images/
   └── js/
@@ -254,10 +261,10 @@ ReactModule
 
 ```typescript
 export default () => ({
-  port: parseInt(process.env.PORT || '3000', 10),
-  mockApiBaseUrl: process.env.MOCK_API_BASE_URL || 'http://localhost:3001',
-  sessionSecret: process.env.SESSION_SECRET || 'dev-secret',
-  nodeEnv: process.env.NODE_ENV || 'development',
+  port: parseInt(process.env.PORT || "3000", 10),
+  mockApiBaseUrl: process.env.MOCK_API_BASE_URL || "http://localhost:3001",
+  sessionSecret: process.env.SESSION_SECRET || "dev-secret",
+  nodeEnv: process.env.NODE_ENV || "development",
 });
 ```
 
@@ -267,13 +274,13 @@ Injected globally via `ConfigModule.forRoot({ isGlobal: true })`.
 
 ### Entry Points
 
-**1. Main Application Bundle: `client/entry.ts`**
+**1. Main Application Bundle: `src/client/entry.ts`**
 
 - Imports GOV.UK Frontend `initAll`
 - Scans for `[data-island]` elements
 - Lazy-loads island bundles on demand
 
-**2. Island Bundles: `client/islands/**/mount.tsx`\*\*
+**2. Island Bundles: `src/client/islands/**/mount.tsx`\*\*
 
 - One bundle per island
 - Exported default: `(el: HTMLElement, props: any) => void`
@@ -302,10 +309,10 @@ When rendering island mount points, props are JSON-stringified with character es
 
 ```typescript
 const safeProps = JSON.stringify(props)
-  .replace(/</g, '\\u003c')
-  .replace(/>/g, '\\u003e')
-  .replace(/&/g, '\\u0026')
-  .replace(/'/g, '\\u0027');
+  .replace(/</g, "\\u003c")
+  .replace(/>/g, "\\u003e")
+  .replace(/&/g, "\\u0026")
+  .replace(/'/g, "\\u0027");
 
 return `<div data-props='${safeProps}'></div>`;
 ```
@@ -330,19 +337,10 @@ Not included in Phase 1. Recommended for future phases when handling form submis
 - Full HTML sent to browser (no JS parsing needed for initial render)
 - Content immediately visible
 - SEO-friendly (all content in HTML)
-- Graceful degradation (works without JS)
+- Progressive enhancement (works without JS)
 
 ### Island Benefits
 
-- Code-split: Only necessary JS loaded
-- Lazy-loaded: Islands JS downloads only when needed
+- Code-splitting: Only necessary JS loaded
+- Lazy loading: Islands JS downloads only when needed
 - Small bundles: Each island is independent
-
-### Potential Optimizations (Future)
-
-- Asset fingerprinting for cache busting
-- Response compression (gzip)
-- HTTP/2 server push
-- CDN for static assets
-- Database query caching
-- Connection pooling
