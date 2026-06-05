@@ -26,6 +26,16 @@ try {
 } catch (err: any) {
   console.error('Error copying CSS:', err.message);
 }
+console.log('Copying custom CSS...');
+try {
+  copyFileSync(
+    join(__dirname, '../src/css/example-island.css'),
+    join(publicAssetsPath, 'example-island.css'),
+  );
+  console.log('✓ Copied example-island.css');
+} catch (err: any) {
+  console.error('Error copying CSS:', err.message);
+}
 
 // Copy fonts
 try {
