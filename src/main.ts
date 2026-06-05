@@ -11,7 +11,7 @@ import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService); // Type used as unique ID for config service singleton instance
-  const port = configService.get<number>("port") || 3000; // reads from `process.env.PORT` (mapped from env vars in `config/configuration.ts`)
+  const port = configService.get<number>("port") || 3000; // mapped from env vars in `config/configuration.ts`
   const sessionSecret =
     configService.get<string>("sessionSecret") || "dev-secret";
 
@@ -74,8 +74,8 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
 
   await app.listen(port, () => {
-    console.log(`🚀 Application running on port ${port}`);
-    console.log(`📝 Mock API running on port 3001`);
+    console.log(`Application running on port ${port}`);
+    console.log("Mock API running on port 3001");
   });
 }
 

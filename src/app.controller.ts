@@ -25,9 +25,6 @@ export class AppController {
     );
 
     const islandProps = { initialCount: this.counterValue };
-
-    console.log("this.counterValue", this.counterValue);
-
     const islandMount = renderIslandMount({
       mountId: "example-island-mount",
       bundle: "/js/islands/ExampleIsland/mount.js",

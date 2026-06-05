@@ -14,15 +14,12 @@ const ClientExampleIsland: React.FC<ExampleIslandProps> = ({
 
   // Debounced POST request to update counter on server
   React.useEffect(() => {
-    // Clear existing timeout if count changes again
     if (debounceTimerId.current !== null) {
       clearTimeout(debounceTimerId.current);
     }
 
-    // Set new timeout for debounced request
     debounceTimerId.current = window.setTimeout(() => {
       console.log(`sending POST to update counter value at ${Date.now()}`);
-      // Send POST request with new counter value (no action field)
       fetch("/example-island", {
         method: "POST",
         headers: {
@@ -32,9 +29,8 @@ const ClientExampleIsland: React.FC<ExampleIslandProps> = ({
       }).catch((error) => {
         console.error("Failed to update counter on server:", error);
       });
-    }, EXAMPLE_ISLAND_POST_COUNTER_DEBOUNCE); // 500ms debounce
+    }, EXAMPLE_ISLAND_POST_COUNTER_DEBOUNCE);
 
-    // Cleanup function to clear timeout on unmount
     return () => {
       if (debounceTimerId.current !== null) {
         clearTimeout(debounceTimerId.current);
