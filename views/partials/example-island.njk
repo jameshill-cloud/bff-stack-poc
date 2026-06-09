@@ -1,26 +1,22 @@
+{% from "components/button/macro.njk" import govukButton %}
+
 <form method="POST" action="/example-island">
   <div id="example-island-fallback" class="govuk-panel">
     <h2 class="govuk-heading-m">JavaScript disabled: SSR fallback</h2>
     <p class="govuk-body">Count: {{ counterValue }}</p>
     <div style="display:inline-flex;gap:8px">
-      <button
-        id="decrement-btn"
-        class="govuk-button"
-        type="submit"
-        name="action"
-        value="decrement"
-      >
-        Decrement
-      </button>
-      <button
-        id="increment-btn"
-        class="govuk-button"
-        type="submit"
-        name="action"
-        value="increment"
-      >
-        Increment
-      </button>
+      {{ govukButton({
+        text: "Decrement",
+        id: "decrement-btn",
+        name: "action",
+        value: "decrement"
+      }) }}
+      {{ govukButton({
+        text: "Increment",
+        id: "increment-btn",
+        name: "action",
+        value: "increment"
+      }) }}
     </div>
   </div>
 
