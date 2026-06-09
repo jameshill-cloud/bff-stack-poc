@@ -1,29 +1,24 @@
-<footer class="govuk-footer" role="contentinfo">
-  <div class="govuk-width-container">
-    <div class="govuk-footer__meta">
-      <div class="govuk-footer__meta-item govuk-footer__meta-item--grow">
-        <h2 class="govuk-visually-hidden">Support links</h2>
-        <ul class="govuk-footer__inline-list">
-          <li class="govuk-footer__inline-list-item">
-            <a class="govuk-footer__link" href="#">Accessibility</a>
-          </li>
-          <li class="govuk-footer__inline-list-item">
-            <a class="govuk-footer__link" href="#">Cookies</a>
-          </li>
-          <li class="govuk-footer__inline-list-item">
-            <a class="govuk-footer__link" href="#">Privacy</a>
-          </li>
-          <li class="govuk-footer__inline-list-item">
-            <a class="govuk-footer__link" href="#">Contact us</a>
-          </li>
-        </ul>
-      </div>
-      <div class="govuk-footer__meta-item">
-        <a class="govuk-footer__link govuk-footer__copyright-logo"
-           href="https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/uk-government-licensing-framework/crown-copyright/">
-          &copy; Crown copyright
-        </a>
-      </div>
-    </div>
-  </div>
-</footer>
+{% from "components/footer/macro.njk" import govukFooter %}
+
+{{ govukFooter({
+  meta: {
+    items: [
+      {
+        href: "#",
+        text: "Accessibility"
+      },
+      {
+        href: "#",
+        text: "Cookies"
+      },
+      {
+        href: "#",
+        text: "Privacy"
+      },
+      {
+        href: "#",
+        text: "Contact us"
+      }
+    ]
+  }
+}) }}
