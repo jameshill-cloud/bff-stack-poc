@@ -1,14 +1,16 @@
 {% extends "layouts/base.njk" %}
 
+{% from "components/inset-text/macro.njk" import govukInsetText %}
+
 {% block content %}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
     <h1 class="govuk-heading-xl">NestJS + React PoC</h1>
 
     <h2 class="govuk-heading-m">React SSR Example</h2>
-    <div class="govuk-inset-text">
-      The content below is rendered by React on the server and sent as HTML:
-    </div>
+    {{ govukInsetText({
+      html: "The content below is rendered by React on the server and sent as HTML:"
+    }) }}
 
     {{ serverComponentHtml | safe }}
 
