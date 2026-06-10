@@ -5,7 +5,7 @@
   "main": "dist/main.js",
   "type": "commonjs",
   "scripts": {
-    "build": "npm run copy-assets && nest build && ts-node scripts/build-islands.ts",
+    "build": "nest build && npm run copy-assets && ts-node scripts/build-islands.ts",
     "build:islands": "ts-node scripts/build-islands.ts",
     "build:islands:watch": "ts-node scripts/build-islands.ts --watch",
     "copy-assets": "ts-node scripts/copy-assets.ts",
