@@ -35,6 +35,9 @@ export class AppController {
       pageTitle: "Home",
       productName: "NestJS + React PoC",
       homepageUrl: "/",
+      phaseBannerTagText: "DEMO",
+      phaseBannerHtml:
+        "This is a proof of concept demonstration, and is not intended for public use",
       message: this.appService.getHello(),
       serverComponentHtml,
       islandMount,
