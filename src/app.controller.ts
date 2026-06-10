@@ -33,10 +33,31 @@ export class AppController {
 
     res.render("home", {
       pageTitle: "Home",
+      productName: "NestJS + React PoC",
+      homepageUrl: "/",
       message: this.appService.getHello(),
       serverComponentHtml,
       islandMount,
       counterValue: this.counterValue,
+      footerLinksTitle: "Useful links",
+      footerLinks: [
+        {
+          href: "#",
+          text: "Accessibility",
+        },
+        {
+          href: "#",
+          text: "Cookies",
+        },
+        {
+          href: "#",
+          text: "Privacy",
+        },
+        {
+          href: "#",
+          text: "Contact us",
+        },
+      ],
     });
   }
 

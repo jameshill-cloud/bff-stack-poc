@@ -1,0 +1,8 @@
+{% from "components/footer/macro.njk" import govukFooter %}
+
+{{ govukFooter({
+  meta: {
+    visuallyHiddenTitle: footerLinksTitle,
+    items: footerLinks
+  }
+}) }}

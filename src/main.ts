@@ -16,7 +16,10 @@ async function bootstrap() {
     configService.get<string>("sessionSecret") || "dev-secret";
 
   // Configure Nunjucks as view engine
-  const viewsPath = join(__dirname, "..", "views");
+  const viewsPath = join(__dirname, "views");
+
+  console.log("viewsPath", viewsPath);
+
   const govukPath = join(
     __dirname,
     "..",
